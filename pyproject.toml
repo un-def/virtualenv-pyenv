@@ -1,0 +1,17 @@
+[build-system]
+requires = ['poetry-core']
+build-backend = 'poetry.core.masonry.api'
+
+[tool.poetry]
+name = 'virtualenv-pyenv'
+version = '0.1.0.dev0'
+description = ''
+authors = ['un.def <me@undef.im>']
+packages = [{include = '_virtualenv_pyenv', from = 'src'}]
+
+[tool.poetry.plugins.'virtualenv.discovery']
+pyenv = '_virtualenv_pyenv.discovery:Pyenv'
+
+[tool.poetry.dependencies]
+python = '^3.6'
+virtualenv = '*'

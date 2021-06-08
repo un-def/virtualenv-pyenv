@@ -14,11 +14,7 @@ indent_size = 4
 indent_style = space
 indent_size = 2
 
-[*.toml]
-indent_style = space
-indent_size = 4
-
-[*.ini]
+[*.{toml,json,ini}]
 indent_style = space
 indent_size = 4
 
