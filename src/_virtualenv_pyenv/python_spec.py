@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import re
 from typing import NamedTuple, Optional
 
@@ -30,7 +28,7 @@ class PyenvPythonSpec(NamedTuple):
     variant: Optional[str]
 
     @classmethod
-    def from_string_spec(cls, string_spec: str) -> Optional[PyenvPythonSpec]:
+    def from_string_spec(cls, string_spec: str) -> Optional['PyenvPythonSpec']:
         is_cpython = string_spec[0].isdigit()
         is_miniconda3 = string_spec.startswith('miniconda3-')
         is_src = string_spec.endswith('-src')
