@@ -15,3 +15,43 @@ pyenv = '_virtualenv_pyenv.discovery:Pyenv'
 [tool.poetry.dependencies]
 python = '^3.6'
 virtualenv = '*'
+
+[tool.isort]
+lines_after_imports = 2
+multi_line_output = 5
+include_trailing_comma = true
+use_parentheses = true
+known_first_party = ['_virtualenv_pyenv']
+known_third_party = ['virtualenv']
+
+[tool.pytest.ini_options]
+minversion = '6.0'
+testpaths = ['tests']
+
+[tool.tox]
+legacy_tox_ini = '''
+[tox]
+envlist =
+    py36
+    py37
+    py38
+    py39
+    flake8
+    isort
+isolated_build = true
+
+[testenv]
+deps =
+    pytest
+commands = pytest {posargs}
+
+[testenv:flake8]
+skip_install = true
+deps = flake8
+commands = flake8 {posargs}
+
+[testenv:isort]
+skip_install = true
+deps = isort
+commands = isort {posargs:. -c}
+'''
