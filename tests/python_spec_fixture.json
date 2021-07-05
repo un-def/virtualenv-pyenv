@@ -1,5 +1,5 @@
 {
-    "pyenv_version": "2.0.1",
+    "pyenv_version": "2.0.3",
     "specs": [
         {
             "string_spec": "2.1.3",
@@ -614,6 +614,12 @@
             "variant": null
         },
         {
+            "string_spec": "3.6.14",
+            "implementation": "cpython",
+            "version": "3.6.14",
+            "variant": null
+        },
+        {
             "string_spec": "3.7.0",
             "implementation": "cpython",
             "version": "3.7.0",
@@ -683,6 +689,12 @@
             "string_spec": "3.7.10",
             "implementation": "cpython",
             "version": "3.7.10",
+            "variant": null
+        },
+        {
+            "string_spec": "3.7.11",
+            "implementation": "cpython",
+            "version": "3.7.11",
             "variant": null
         },
         {
@@ -758,6 +770,12 @@
             "variant": null
         },
         {
+            "string_spec": "3.8.11",
+            "implementation": "cpython",
+            "version": "3.8.11",
+            "variant": null
+        },
+        {
             "string_spec": "3.9.0",
             "implementation": "cpython",
             "version": "3.9.0",
@@ -800,9 +818,15 @@
             "variant": null
         },
         {
-            "string_spec": "3.10.0b1",
+            "string_spec": "3.9.6",
             "implementation": "cpython",
-            "version": "3.10.0b1",
+            "version": "3.9.6",
+            "variant": null
+        },
+        {
+            "string_spec": "3.10.0b3",
+            "implementation": "cpython",
+            "version": "3.10.0b3",
             "variant": null
         },
         {
@@ -1346,6 +1370,18 @@
             "variant": null
         },
         {
+            "string_spec": "mambaforge-4.10.1-4",
+            "implementation": "mambaforge",
+            "version": "4.10.1-4",
+            "variant": null
+        },
+        {
+            "string_spec": "mambaforge-4.10.1-5",
+            "implementation": "mambaforge",
+            "version": "4.10.1-5",
+            "variant": null
+        },
+        {
             "string_spec": "micropython-dev",
             "implementation": "micropython",
             "version": "dev",
@@ -1835,6 +1871,12 @@
             "string_spec": "miniforge3-4.10.1-3",
             "implementation": "miniforge3",
             "version": "4.10.1-3",
+            "variant": null
+        },
+        {
+            "string_spec": "miniforge3-4.10.1-5",
+            "implementation": "miniforge3",
+            "version": "4.10.1-5",
             "variant": null
         },
         {
@@ -2684,9 +2726,27 @@
             "variant": null
         },
         {
+            "string_spec": "pypy3.7-7.3.4-src",
+            "implementation": "pypy3.7",
+            "version": "7.3.4",
+            "variant": "src"
+        },
+        {
             "string_spec": "pypy3.7-7.3.4",
             "implementation": "pypy3.7",
             "version": "7.3.4",
+            "variant": null
+        },
+        {
+            "string_spec": "pypy3.7-7.3.5-src",
+            "implementation": "pypy3.7",
+            "version": "7.3.5",
+            "variant": "src"
+        },
+        {
+            "string_spec": "pypy3.7-7.3.5",
+            "implementation": "pypy3.7",
+            "version": "7.3.5",
             "variant": null
         },
         {
