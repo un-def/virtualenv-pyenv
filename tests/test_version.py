@@ -2,6 +2,19 @@ import pytest
 
 from _virtualenv_pyenv.version import Version
 
+from tests.testlib import python_spec_fixture
+
+
+@pytest.mark.parametrize('string_version', [
+    spec_dict['version']
+    for spec_dict in python_spec_fixture['specs']
+    if spec_dict['implementation'] == 'cpython'
+])
+def test_parse_fixture_specs(string_version):
+    version = Version.from_string_version(string_version)
+
+    assert version is not None
+
 
 @pytest.mark.parametrize('str_v1,str_v2,expected', [
     ('2.0', '2.0.0', True),

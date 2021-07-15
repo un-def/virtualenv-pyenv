@@ -21,8 +21,10 @@ lines_after_imports = 2
 multi_line_output = 5
 include_trailing_comma = true
 use_parentheses = true
+sections = ['FUTURE', 'STDLIB', 'THIRDPARTY', 'FIRSTPARTY', 'TESTS']
 known_first_party = ['_virtualenv_pyenv']
 known_third_party = ['virtualenv']
+known_tests = ['tests']
 
 [tool.pytest.ini_options]
 minversion = '6.0'
