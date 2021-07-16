@@ -108,6 +108,21 @@ class Version:
     def __hash__(self) -> int:
         return self._hash
 
+    def __contains__(self, item: Any) -> bool:
+        if not isinstance(item, Version):
+            return False
+        if self._dev ^ item._dev:
+            return False
+        if self._pre != item._pre:
+            return False
+        if len(self._base) > len(item._base):
+            return False
+        if self._dev or item._dev:
+            item_base = item._base
+        else:
+            item_base = item._base[:len(self._base)]
+        return self._base == item_base
+
     __eq__ = Comparison()
     __ne__ = Comparison()
     __lt__ = Comparison()

@@ -10,7 +10,7 @@ from tests.testlib import python_spec_fixture
     for spec_dict in python_spec_fixture['specs']
     if spec_dict['implementation'] == 'cpython'
 ])
-def test_parse_fixture_specs(string_version):
+def test_parse_fixture_cpython_specs(string_version):
     version = Version.from_string_version(string_version)
 
     assert version is not None
@@ -85,3 +85,27 @@ def test_gt_le(str_v1, str_v2, expected):
 
     assert gt_result is expected
     assert le_result is not expected
+
+
+@pytest.mark.parametrize('str_v1,str_v2,expected', [
+    ('2.6.7', '2.6', True),
+    ('2.6.7', '2.6.7', True),
+    ('2.6', '2.6.7', False),
+    ('2.6.7', '2.7', False),
+    ('2.6.7-dev', '2.6', False),
+    ('2.6.7', '2.6-dev', False),
+    ('2.6.7-dev', '2.6-dev', False),
+    ('2.6.7-dev', '2.6.7-dev', True),
+    ('2.6.8-dev', '2.6.7-dev', False),
+    ('2.6.7a3', '2.6', False),
+    ('2.6.7a3', '2.6.7b3', False),
+    ('2.6.7a3', '2.6.8a3', False),
+    ('2.6.7a3', '2.6.7a3', True),
+])
+def test_contains(str_v1, str_v2, expected):
+    v1 = Version.from_string_version(str_v1)
+    v2 = Version.from_string_version(str_v2)
+
+    result = v1 in v2
+
+    assert result is expected
