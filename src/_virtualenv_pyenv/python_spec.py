@@ -2,6 +2,9 @@ import re
 from typing import NamedTuple, Optional
 
 
+IMPL_CPYTHON = 'cpython'
+
+
 VERSION_PATTERN = (
     r'(?P<version>[0-9][0-9a-z]*(?:\.[0-9][0-9a-z]*)*(?:-[0-9a-z]+)?'
     r'|latest|dev)'
@@ -44,7 +47,7 @@ class PyenvPythonSpec(NamedTuple):
         fields = match.groupdict()
         fields['string_spec'] = string_spec
         if is_cpython:
-            fields['implementation'] = 'cpython'
+            fields['implementation'] = IMPL_CPYTHON
         if is_src:
             fields['variant'] = 'src'
         else:

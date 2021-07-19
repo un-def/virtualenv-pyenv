@@ -79,6 +79,15 @@ class Version:
         return hash((self._base_short, self._pre, self._dev))
 
     @Cached
+    def _string_version(self) -> str:
+        string_version = '.'.join(map(str, self._base))
+        if self._pre:
+            string_version = f'{string_version}{self._pre[0]}{self._pre[1]}'
+        if self._dev:
+            string_version = f'{string_version}-dev'
+        return string_version
+
+    @Cached
     def _comparable(
         self,
     ) -> Tuple[Tuple[int, ...], int, int, Optional[Tuple[str, int]]]:
@@ -104,6 +113,12 @@ class Version:
                 fields['pre'] = (pre[0], int(pre[1:]))
         fields['dev'] = bool(fields['dev'])
         return cls(**fields)
+
+    def __str__(self) -> str:
+        return self._string_version
+
+    def __repr__(self) -> str:
+        return f'Version {self}'
 
     def __hash__(self) -> int:
         return self._hash

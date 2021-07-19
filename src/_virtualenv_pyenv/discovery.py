@@ -1,11 +1,13 @@
 import logging
 import os
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from virtualenv.discovery.discover import Discover
 from virtualenv.discovery.py_info import PythonInfo
-from virtualenv.discovery.py_spec import PythonSpec
+
+from _virtualenv_pyenv.python_spec import IMPL_CPYTHON, PyenvPythonSpec
+from _virtualenv_pyenv.version import Version
 
 
 _pyenv_root: Optional[Path] = None
@@ -60,15 +62,15 @@ class Pyenv(Discover):
 
     def __init__(self, options) -> None:
         super().__init__(options)
-        self.python_specs = options.python
-        self.app_data = options.app_data
+        self._string_specs: List[str] = options.python
+        self._app_data = options.app_data
 
     def __str__(self) -> str:
-        if len(self.python_specs) == 1:
-            spec = self.python_specs[0]
+        if len(self._string_specs) == 1:
+            spec = self._string_specs[0]
         else:
-            spec = self.python_specs
-        return f'{self.__class__.__name__} discover of python_spec={spec!r}'
+            spec = self._string_specs
+        return f'{self.__class__.__name__} discover of spec={spec!r}'
 
     @classmethod
     def add_parser_arguments(cls, parser) -> None:
@@ -83,30 +85,40 @@ class Pyenv(Discover):
         )
 
     def run(self) -> Optional[PythonInfo]:
-        for python_spec in self.python_specs:
-            result = get_interpreter(python_spec, self.app_data, self._env)
+        for string_spec in self._string_specs:
+            result = self._get_interpreter(string_spec)
             if result is not None:
                 return result
         return None
 
-
-def get_interpreter(python_spec, app_data, env) -> Optional[PythonInfo]:
-    spec = PythonSpec.from_string_spec(python_spec)
-    logging.info('find interpreter for spec %r', spec)
-    proposed_paths = set()
-    for interpreter in propose_interpreters(spec, app_data, env):
-        if interpreter.system_executable in proposed_paths:
-            continue
-        logging.info('proposed %s', interpreter)
-        if interpreter.satisfies(spec, impl_must_match=True):
-            logging.debug('accepted %s', interpreter)
-            return interpreter
-        proposed_paths.add(interpreter.system_executable)
-    return None
-
-
-def propose_interpreters(spec, app_data, env):
-    versions_dir = get_pyenv_versions_directory()
-    for version_dir in versions_dir.iterdir():
-        bin_path = get_pyenv_python_bin_path(version_dir)
-        yield PythonInfo.from_exe(str(bin_path), app_data, env=env)
+    def _get_interpreter(self, string_spec: str) -> Optional[PythonInfo]:
+        spec = PyenvPythonSpec.from_string_spec(string_spec)
+        if spec is None:
+            logging.error('failed to parse spec %s', string_spec)
+            return None
+        if spec.implementation != IMPL_CPYTHON:
+            logging.error('only CPython is currently supported')
+            return None
+        logging.debug('find interpreter for spec %s', string_spec)
+        requested_version = Version.from_string_version(spec.version)
+        if requested_version is None:
+            logging.error('failed to parse requested version %s', spec.version)
+            return None
+        best_match_version: Optional[Version] = None
+        best_match_dir: Optional[Path] = None
+        for version_dir in get_pyenv_versions_directory().iterdir():
+            version = Version.from_string_version(version_dir.name)
+            if version is None:
+                logging.error('failed to parse pyenv version %s', version)
+                continue
+            if version in requested_version:
+                logging.debug('proposed %s', version)
+                if not best_match_version or version > best_match_version:
+                    best_match_version = version
+                    best_match_dir = version_dir
+        if not best_match_version:
+            return None
+        logging.debug('accepted %s', best_match_version)
+        bin_path = get_pyenv_python_bin_path(best_match_dir)
+        return PythonInfo.from_exe(
+            str(bin_path), app_data=self._app_data, env=self._env)
