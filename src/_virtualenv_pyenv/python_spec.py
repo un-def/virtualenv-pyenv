@@ -1,58 +1,45 @@
+from __future__ import annotations
+
+import enum
 import re
 from typing import NamedTuple, Optional
 
+from .version import VERSION_PATTERN
 
-IMPL_CPYTHON = 'cpython'
+
+class Implementation(enum.Enum):
+    CPYTHON = 'cpython'
+    UNSUPPORTED = 'unsupported'
 
 
-VERSION_PATTERN = (
-    r'(?P<version>[0-9][0-9a-z]*(?:\.[0-9][0-9a-z]*)*(?:-[0-9a-z]+)?'
-    r'|latest|dev)'
-)
 CPYTHON_SPEC_REGEX = re.compile(
-    rf'{VERSION_PATTERN}'
-)
-MINICONDA3_SPEC_REGEX = re.compile(
-    r'(?P<implementation>miniconda3(?:-[0-9]\.[0-9]{1,2})?)'
-    rf'-{VERSION_PATTERN}'
-)
-OTHER_SPEC_REGEX = re.compile(
-    r'(?P<implementation>[a-z][a-z0-9.]*(?:-[a-z0-9]+)*)'
-    rf'-{VERSION_PATTERN}'
+    rf'(?P<version>{VERSION_PATTERN})'
 )
 
 
 class PyenvPythonSpec(NamedTuple):
     """Contains specification about a Python Interpreter"""
-
     string_spec: str
-    implementation: str
-    version: str
-    variant: Optional[str]
+    implementation: Implementation
+    version: Optional[str]
 
     @classmethod
-    def from_string_spec(cls, string_spec: str) -> Optional['PyenvPythonSpec']:
+    def from_string_spec(cls, string_spec: str) -> Optional[PyenvPythonSpec]:
         is_cpython = string_spec[0].isdigit()
-        is_miniconda3 = string_spec.startswith('miniconda3-')
-        is_src = string_spec.endswith('-src')
         if is_cpython:
-            regex = CPYTHON_SPEC_REGEX
-        elif is_miniconda3:
-            regex = MINICONDA3_SPEC_REGEX
+            implementation = Implementation.CPYTHON
+            match = CPYTHON_SPEC_REGEX.fullmatch(string_spec)
+            if not match:
+                return None
+            version = match.group('version')
         else:
-            regex = OTHER_SPEC_REGEX
-        match = regex.fullmatch(string_spec[:-4] if is_src else string_spec)
-        if not match:
-            return None
-        fields = match.groupdict()
-        fields['string_spec'] = string_spec
-        if is_cpython:
-            fields['implementation'] = IMPL_CPYTHON
-        if is_src:
-            fields['variant'] = 'src'
-        else:
-            fields['variant'] = None
-        return cls(**fields)
+            implementation = Implementation.UNSUPPORTED
+            version = None
+        return cls(string_spec, implementation, version)
 
     def to_dict(self) -> dict:
-        return self._asdict()
+        return {
+            'string_spec': self.string_spec,
+            'implementation': self.implementation.value,
+            'version': self.version,
+        }

@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import operator
 import re
 from functools import partial
 from typing import Any, Optional, Tuple
 
 
-VERSION_REGEX = re.compile(
+VERSION_PATTERN = (
     r'(?P<base>\d(?:\.\d+){1,2})(?:(?P<pre>(?:a|b|rc)\d+)?|-(?P<dev>dev))')
+VERSION_REGEX = re.compile(VERSION_PATTERN)
 
 
 class Readonly:
@@ -44,7 +47,7 @@ class Comparison:
             return self
         return partial(self._compare, instance)
 
-    def _compare(self, left: 'Version', right: Any) -> bool:
+    def _compare(self, left: Version, right: Any) -> bool:
         if not isinstance(right, Version):
             return NotImplemented
         return self.op(left._comparable, right._comparable)

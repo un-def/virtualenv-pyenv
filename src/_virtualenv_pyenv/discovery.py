@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 from pathlib import Path
@@ -6,8 +8,8 @@ from typing import List, Optional
 from virtualenv.discovery.discover import Discover
 from virtualenv.discovery.py_info import PythonInfo
 
-from _virtualenv_pyenv.python_spec import IMPL_CPYTHON, PyenvPythonSpec
-from _virtualenv_pyenv.version import Version
+from .python_spec import Implementation, PyenvPythonSpec
+from .version import Version
 
 
 _pyenv_root: Optional[Path] = None
@@ -96,7 +98,7 @@ class Pyenv(Discover):
         if spec is None:
             logging.error('failed to parse spec %s', string_spec)
             return None
-        if spec.implementation != IMPL_CPYTHON:
+        if spec.implementation != Implementation.CPYTHON:
             logging.error('only CPython is currently supported')
             return None
         logging.debug('find interpreter for spec %s', string_spec)

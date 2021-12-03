@@ -11,7 +11,7 @@ from subprocess import check_output
 from tempfile import TemporaryDirectory
 from urllib.request import urlopen
 
-from _virtualenv_pyenv.python_spec import PyenvPythonSpec
+from _virtualenv_pyenv.python_spec import Implementation, PyenvPythonSpec
 
 
 REPO_ROOT = Path(__file__).parent.parent
@@ -89,6 +89,8 @@ def _main() -> None:
     not_checked_specs: list[str] = []
     for string_spec in pyenv_specs:
         spec = PyenvPythonSpec.from_string_spec(string_spec)
+        if spec.implementation != Implementation.CPYTHON:
+            continue
         spec_dict = spec.to_dict()
         fixture_spec_dict = fixture_specs_dict.get(string_spec)
         checked = (
