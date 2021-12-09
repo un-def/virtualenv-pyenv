@@ -4,9 +4,21 @@ build-backend = 'poetry.core.masonry.api'
 
 [tool.poetry]
 name = 'virtualenv-pyenv'
-version = '0.1.0.dev0'
-description = ''
+version = '0.1.0'
+description = 'A virtualenv Python discovery plugin using pyenv'
+license = 'MIT'
 authors = ['un.def <me@undef.im>']
+readme = 'README.md'
+homepage = 'https://github.com/un-def/virtualenv-pyenv'
+repository = 'https://github.com/un-def/virtualenv-pyenv'
+keywords = ['virtualenv', 'pyenv']
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Topic :: Software Development :: Libraries',
+    'Topic :: Software Development :: Testing',
+    'Topic :: Utilities',
+]
 packages = [{include = '_virtualenv_pyenv', from = 'src'}]
 
 [tool.poetry.plugins.'virtualenv.discovery']
