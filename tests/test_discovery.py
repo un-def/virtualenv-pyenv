@@ -5,7 +5,7 @@ from _virtualenv_pyenv.discovery import Pyenv
 
 @pytest.fixture
 def pyenv_root(mocker, tmp_path):
-    mocker.patch('_virtualenv_pyenv.discovery._pyenv_root', tmp_path)
+    mocker.patch('pyenv_inspect.path.get_pyenv_root', return_value=tmp_path)
     (tmp_path / 'versions').mkdir()
     return tmp_path
 
@@ -77,6 +77,16 @@ def test_cpython_no_match(
     options_mock.python = requested_versions
     discovery = Pyenv(options_mock)
     _prepare_versions(pyenv_root, versions)
+
+    result = discovery.run()
+
+    assert result is None
+    from_exe_mock.assert_not_called()
+
+
+def test_cpython_spec_parse_error(options_mock, from_exe_mock):
+    options_mock.python = '37.7'
+    discovery = Pyenv(options_mock)
 
     result = discovery.run()
 

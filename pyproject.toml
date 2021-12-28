@@ -4,7 +4,7 @@ build-backend = 'poetry.core.masonry.api'
 
 [tool.poetry]
 name = 'virtualenv-pyenv'
-version = '0.1.0'
+version = '0.2.0.dev0'
 description = 'A virtualenv Python discovery plugin using pyenv'
 license = 'MIT'
 authors = ['un.def <me@undef.im>']
@@ -27,16 +27,15 @@ pyenv = '_virtualenv_pyenv.discovery:Pyenv'
 [tool.poetry.dependencies]
 python = '^3.7'
 virtualenv = '*'
+pyenv-inspect = '*'
 
 [tool.isort]
 lines_after_imports = 2
 multi_line_output = 5
 include_trailing_comma = true
 use_parentheses = true
-sections = ['FUTURE', 'STDLIB', 'THIRDPARTY', 'FIRSTPARTY', 'LOCALFOLDER', 'TESTS']
 known_first_party = ['_virtualenv_pyenv']
-known_third_party = ['virtualenv']
-known_tests = ['tests']
+known_third_party = ['virtualenv', 'pyenv_inspect']
 
 [tool.pytest.ini_options]
 minversion = '6.0'
