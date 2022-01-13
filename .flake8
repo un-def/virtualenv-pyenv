@@ -2,6 +2,5 @@
 filename =
     ./src/**.py
     ./tests/**.py
-    ./scripts/**.py
 show_source = true
 statistics = true
