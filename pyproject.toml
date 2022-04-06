@@ -27,7 +27,7 @@ pyenv = '_virtualenv_pyenv.discovery:Pyenv'
 [tool.poetry.dependencies]
 python = '^3.7'
 virtualenv = '*'
-pyenv-inspect = '*'
+pyenv-inspect = '~0.2'
 
 [tool.isort]
 lines_after_imports = 2
@@ -56,6 +56,7 @@ isolated_build = true
 [testenv]
 deps =
     pytest
+    pytest-mock
 commands = pytest {posargs}
 
 [testenv:flake8]

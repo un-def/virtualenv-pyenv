@@ -37,7 +37,7 @@ def _prepare_versions(pyenv_root, versions, expected_version=None):
         bin_dir = pyenv_root / 'versions' / version / 'bin'
         bin_dir.mkdir(parents=True)
         bin_path = bin_dir / 'python'
-        bin_path.touch()
+        bin_path.touch(mode=0o777)
         if version == expected_version:
             expected_bin_path = bin_path
     return expected_bin_path

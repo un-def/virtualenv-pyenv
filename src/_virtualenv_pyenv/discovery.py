@@ -1,15 +1,10 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import List, Optional
 
-from pyenv_inspect.exceptions import SpecParseError
-from pyenv_inspect.path import (
-    get_pyenv_python_bin_path, get_pyenv_versions_directory,
-)
-from pyenv_inspect.spec import Implementation, PyenvPythonSpec
-from pyenv_inspect.version import Version
+from pyenv_inspect import find_pyenv_python_executable
+from pyenv_inspect.exceptions import SpecParseError, UnsupportedImplementation
 from virtualenv.discovery.discover import Discover
 from virtualenv.discovery.py_info import PythonInfo
 
@@ -49,34 +44,16 @@ class Pyenv(Discover):
         return None
 
     def _get_interpreter(self, string_spec: str) -> Optional[PythonInfo]:
+        logging.debug('find interpreter for spec %s', string_spec)
         try:
-            spec = PyenvPythonSpec.from_string_spec(string_spec)
+            exec_path = find_pyenv_python_executable(string_spec)
         except SpecParseError:
             logging.error('failed to parse spec %s', string_spec)
             return None
-        if spec.implementation != Implementation.CPYTHON:
+        except UnsupportedImplementation:
             logging.error('only CPython is currently supported')
             return None
-        logging.debug('find interpreter for spec %s', string_spec)
-        requested_version = Version.from_string_version(spec.version)
-        if requested_version is None:
-            logging.error('failed to parse requested version %s', spec.version)
+        if exec_path is None:
             return None
-        best_match_version: Optional[Version] = None
-        best_match_dir: Optional[Path] = None
-        for version_dir in get_pyenv_versions_directory().iterdir():
-            version = Version.from_string_version(version_dir.name)
-            if version is None:
-                logging.error('failed to parse pyenv version %s', version)
-                continue
-            if version in requested_version:
-                logging.debug('proposed %s', version)
-                if not best_match_version or version > best_match_version:
-                    best_match_version = version
-                    best_match_dir = version_dir
-        if not best_match_version:
-            return None
-        logging.debug('accepted %s', best_match_version)
-        bin_path = get_pyenv_python_bin_path(best_match_dir)
         return PythonInfo.from_exe(
-            str(bin_path), app_data=self._app_data, env=self._env)
+            str(exec_path), app_data=self._app_data, env=self._env)
