@@ -32,12 +32,21 @@ class Pyenv(Discover):
             metavar='py',
             type=str,
             action='append',
-            required=True,
+            # an empty list as a default value is required for env var support,
+            # see VirtualEnvConfigParser._fix_default() -> get_type()
+            default=[],
             help='interpreter based on what to create environment',
         )
 
     def run(self) -> Optional[PythonInfo]:
-        for string_spec in self._string_specs:
+        string_specs = self._string_specs
+        if not string_specs:
+            logging.error(
+                'interpreter is not specified, use either -p/--python option '
+                'or VIRTUALENV_PYTHON environment variable'
+            )
+            return None
+        for string_spec in string_specs:
             result = self._get_interpreter(string_spec)
             if result is not None:
                 return result
