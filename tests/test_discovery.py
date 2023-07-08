@@ -43,6 +43,30 @@ def _prepare_versions(pyenv_root, versions, expected_version=None):
     return expected_bin_path
 
 
+@pytest.mark.parametrize('requested_versions', [
+    ['/path/to/bin/python3.7'],
+    ['./python3.10'],
+    ['bin/python3.10'],
+    ['C:\\Path\\To\\Bin\\python.exe'],
+    ['.\\python.exe'],
+    ['/path/to/bin/python3.7', '/path/to/bin/python3.10'],
+])
+def test_file_path(
+    options_mock, python_info_mock, from_exe_mock, requested_versions,
+):
+    options_mock.python = requested_versions
+    discovery = Pyenv(options_mock)
+
+    result = discovery.run()
+
+    assert result is python_info_mock
+    from_exe_mock.assert_called_once_with(
+        requested_versions[0],
+        app_data=options_mock.app_data,
+        env=options_mock.env,
+    )
+
+
 @pytest.mark.parametrize('versions,requested_versions,expected_version', [
     (['3.7.2', '3.7.11', '3.8.1'], ['3.7'], '3.7.11'),
     (['3.6.1', '3.6.5', '3.7.2', '3.7.11'], ['3.7.8', '3.6'], '3.6.5'),

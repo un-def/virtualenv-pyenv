@@ -7,6 +7,7 @@ from pyenv_inspect import find_pyenv_python_executable
 from pyenv_inspect.exceptions import SpecParseError, UnsupportedImplementation
 from virtualenv.discovery.discover import Discover
 from virtualenv.discovery.py_info import PythonInfo
+from virtualenv.discovery.py_spec import PythonSpec
 
 
 class Pyenv(Discover):
@@ -54,6 +55,10 @@ class Pyenv(Discover):
 
     def _get_interpreter(self, string_spec: str) -> Optional[PythonInfo]:
         logging.debug('find interpreter for spec %s', string_spec)
+        python_spec = PythonSpec.from_string_spec(string_spec)
+        if python_spec.path is not None:
+            return PythonInfo.from_exe(
+                python_spec.path, app_data=self._app_data, env=self._env)
         try:
             exec_path = find_pyenv_python_executable(string_spec)
         except SpecParseError:
