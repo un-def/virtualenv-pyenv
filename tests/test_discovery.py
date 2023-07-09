@@ -68,7 +68,10 @@ def test_file_path(
 
 
 @pytest.mark.parametrize('versions,requested_versions,expected_version', [
-    # pyenv-style
+    # pyenv-style, pre/dev-release
+    (['3.12-dev', '3.12.0a3'], ['3.12-dev'], '3.12-dev'),
+    (['3.12-dev', '3.12.0a3'], ['3.12.0a3'], '3.12.0a3'),
+    # pyenv-style, final release
     (['3.7.2', '3.7.11', '3.8.1'], ['3.7'], '3.7.11'),
     (['3.6.1', '3.6.5', '3.7.2', '3.7.11'], ['3.7.8', '3.6'], '3.6.5'),
     (['3.6.1', '3.6.5', '3.7.2', '3.7.8'], ['3.7.8', '3.6'], '3.7.8'),
