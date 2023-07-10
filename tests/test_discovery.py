@@ -133,6 +133,9 @@ def test_cpython_ok(
 @pytest.mark.parametrize('versions,requested_versions', [
     (['3.6.2', '3.6.11', '3.8.1'], ['3.7']),
     (['3.6.1', '3.6.5', '3.7.2', '3.7.11'], ['3.7.8', '3.6.4']),
+    # pre/dev releases require _exact_ match
+    (['3.12-dev', '3.12.0a3'], ['3.12']),
+    (['3.12-dev', '3.12.0a3'], ['3.12.0a2']),
 ])
 def test_cpython_no_match(
     pyenv_root, options_mock, from_exe_mock, error_log,
