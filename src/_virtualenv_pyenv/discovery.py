@@ -4,7 +4,9 @@ import logging
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from pyenv_inspect import find_pyenv_python_executable
-from pyenv_inspect.exceptions import SpecParseError, UnsupportedImplementation
+from pyenv_inspect.exceptions import (
+    SpecParseError, UnsupportedImplementation, VersionParseError,
+)
 from pyenv_inspect.spec import Implementation, PyenvPythonSpec
 from virtualenv.discovery.discover import Discover
 from virtualenv.discovery.py_info import PythonInfo
@@ -106,7 +108,11 @@ class Pyenv(Discover):
         return self._find_interpreter(pyenv_spec)
 
     def _find_interpreter(self, spec: PyenvPythonSpec) -> Optional[PythonInfo]:
-        exec_path = find_pyenv_python_executable(spec)
+        try:
+            exec_path = find_pyenv_python_executable(spec)
+        except VersionParseError:
+            logging.error('failed to parse version: %s', spec.version)
+            return None
         if exec_path is None:
             return None
         return self._build_python_info(exec_path)
