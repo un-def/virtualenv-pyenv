@@ -4,6 +4,6 @@
 !.flake8
 
 *.py[co]
-*.whl
 
 /dist/
+*.egg-info/
