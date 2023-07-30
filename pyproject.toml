@@ -18,14 +18,13 @@ classifiers = [
     'Topic :: Software Development :: Testing',
     'Topic :: Utilities',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
 ]
 keywords = ['virtualenv', 'pyenv']
-requires-python = '>= 3.7'
+requires-python = '>= 3.8'
 dependencies = [
     'virtualenv',
     'pyenv-inspect >= 0.2, < 0.3',
@@ -64,7 +63,6 @@ testpaths = ['tests']
 legacy_tox_ini = '''
 [tox]
 envlist =
-    py37
     py38
     py39
     py310
