@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from pyenv_inspect import find_pyenv_python_executable
@@ -49,6 +50,10 @@ class Pyenv(Discover):
     def run(self) -> Optional[PythonInfo]:
         string_specs = self._string_specs
         if not string_specs:
+            # > If Python is unable to retrieve the real path to its
+            # > executable, sys.executable will be an empty string or None.
+            if sys.executable:
+                return self._build_python_info(sys.executable)
             logging.error(
                 'interpreter is not specified, use either -p/--python option '
                 'or VIRTUALENV_PYTHON environment variable'

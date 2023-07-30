@@ -62,6 +62,39 @@ def _prepare_versions(pyenv_root, versions, expected_version=None):
     return expected_bin_path
 
 
+def test_no_specifier_ok(
+    monkeypatch, options_mock, python_info_mock, from_exe_mock, error_log,
+):
+    monkeypatch.setattr('sys.executable', '/sys/executable/python')
+    options_mock.python = []
+    discovery = Pyenv(options_mock)
+
+    result = discovery.run()
+
+    assert result is python_info_mock
+    from_exe_mock.assert_called_once_with(
+        '/sys/executable/python',
+        app_data=options_mock.app_data,
+        env=options_mock.env,
+    )
+    _assert_no_error_message(error_log)
+
+
+@pytest.mark.parametrize('sys_executable', ['', None])
+def test_no_specifier_no_sys_executable(
+    monkeypatch, options_mock, from_exe_mock, error_log, sys_executable,
+):
+    monkeypatch.setattr('sys.executable', sys_executable)
+    options_mock.python = []
+    discovery = Pyenv(options_mock)
+
+    result = discovery.run()
+
+    assert result is None
+    from_exe_mock.assert_not_called()
+    _assert_error_message(error_log, r'interpreter is not specified')
+
+
 @pytest.mark.parametrize('requested_versions', [
     ['/path/to/bin/python3.7'],
     ['./python3.10'],
@@ -201,14 +234,3 @@ def test_unsupported(
     assert result is None
     from_exe_mock.assert_not_called()
     _assert_error_message(error_log, r'only cpython .+ supported')
-
-
-def test_specifier_required(options_mock, from_exe_mock, error_log):
-    options_mock.python = []
-    discovery = Pyenv(options_mock)
-
-    result = discovery.run()
-
-    assert result is None
-    from_exe_mock.assert_not_called()
-    _assert_error_message(error_log, r'interpreter is not specified')
