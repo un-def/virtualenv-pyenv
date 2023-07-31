@@ -38,7 +38,10 @@ Changelog = 'https://github.com/un-def/virtualenv-pyenv/releases'
 Issues = 'https://github.com/un-def/virtualenv-pyenv/issues'
 
 [project.entry-points.'virtualenv.discovery']
-pyenv = '_virtualenv_pyenv.discovery:Pyenv'
+pyenv = '_virtualenv_pyenv.discovery:PyenvCompat'
+pyenv-compat = '_virtualenv_pyenv.discovery:PyenvCompat'
+pyenv-fallback = '_virtualenv_pyenv.discovery:PyenvFallback'
+pyenv-strict = '_virtualenv_pyenv.discovery:PyenvStrict'
 
 [tool.setuptools.dynamic]
 version = {attr = '_virtualenv_pyenv.__version__'}
@@ -58,6 +61,7 @@ known_third_party = ['virtualenv', 'pyenv_inspect']
 [tool.pytest.ini_options]
 minversion = '6.0'
 testpaths = ['tests']
+markers = ['discovery_class']
 
 [tool.tox]
 legacy_tox_ini = '''

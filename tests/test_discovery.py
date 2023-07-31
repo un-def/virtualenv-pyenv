@@ -2,8 +2,22 @@ import logging
 import re
 
 import pytest
+from virtualenv.config.cli.parser import VirtualEnvOptions
 
-from _virtualenv_pyenv.discovery import Pyenv
+from _virtualenv_pyenv.discovery import PyenvCompat, PyenvFallback, PyenvStrict
+
+
+discovery_class = pytest.mark.discovery_class.with_args
+
+
+def pytest_generate_tests(metafunc):
+    if 'discovery_class' not in metafunc.fixturenames:
+        return
+    if marker := metafunc.definition.get_closest_marker('discovery_class'):
+        discovery_classes = marker.args
+    else:
+        discovery_classes = (PyenvCompat, PyenvFallback, PyenvStrict)
+    metafunc.parametrize('discovery_class', discovery_classes)
 
 
 @pytest.fixture
@@ -14,11 +28,11 @@ def pyenv_root(mocker, tmp_path):
 
 
 @pytest.fixture
-def options_mock(mocker):
-    mock = mocker.Mock(name='options')
-    mock.env = mocker.Mock(name='env')
-    mock.app_data = mocker.Mock(name='app_data')
-    return mock
+def options(mocker):
+    _options = VirtualEnvOptions()
+    _options.env = mocker.Mock(name='env')
+    _options.app_data = mocker.Mock(name='app_data')
+    return _options
 
 
 @pytest.fixture
@@ -31,6 +45,19 @@ def from_exe_mock(mocker, python_info_mock):
     return mocker.patch(
         'virtualenv.discovery.py_info.PythonInfo.from_exe',
         return_value=python_info_mock,
+    )
+
+
+@pytest.fixture
+def builtin_python_info_mock(mocker):
+    return mocker.Mock(name='builtin_python_info')
+
+
+@pytest.fixture
+def builtin_get_interpreter_mock(mocker, builtin_python_info_mock):
+    return mocker.patch(
+        'virtualenv.discovery.builtin.get_interpreter',
+        return_value=builtin_python_info_mock,
     )
 
 
@@ -62,37 +89,61 @@ def _prepare_versions(pyenv_root, versions, expected_version=None):
     return expected_bin_path
 
 
-def test_no_specifier_ok(
-    monkeypatch, options_mock, python_info_mock, from_exe_mock, error_log,
+@discovery_class(PyenvCompat, PyenvFallback)
+def test_no_specifier_ok_if_compat_or_fallback(
+    monkeypatch, discovery_class, options, python_info_mock, from_exe_mock,
+    builtin_get_interpreter_mock, error_log,
 ):
     monkeypatch.setattr('sys.executable', '/sys/executable/python')
-    options_mock.python = []
-    discovery = Pyenv(options_mock)
+    options.python = []
+    discovery = discovery_class(options)
 
     result = discovery.run()
 
     assert result is python_info_mock
     from_exe_mock.assert_called_once_with(
         '/sys/executable/python',
-        app_data=options_mock.app_data,
-        env=options_mock.env,
+        app_data=options.app_data,
+        env=options.env,
     )
+    builtin_get_interpreter_mock.assert_not_called()
     _assert_no_error_message(error_log)
 
 
-@pytest.mark.parametrize('sys_executable', ['', None])
-def test_no_specifier_no_sys_executable(
-    monkeypatch, options_mock, from_exe_mock, error_log, sys_executable,
+@discovery_class(PyenvStrict)
+def test_no_specifier_error_if_strict(
+    monkeypatch, discovery_class, options, from_exe_mock,
+    builtin_get_interpreter_mock, error_log,
 ):
-    monkeypatch.setattr('sys.executable', sys_executable)
-    options_mock.python = []
-    discovery = Pyenv(options_mock)
+    monkeypatch.setattr('sys.executable', '/sys/executable/python')
+    options.python = []
+    discovery = discovery_class(options)
 
     result = discovery.run()
 
     assert result is None
     from_exe_mock.assert_not_called()
+    builtin_get_interpreter_mock.assert_not_called()
     _assert_error_message(error_log, r'interpreter is not specified')
+
+
+@pytest.mark.parametrize('sys_executable', ['', None])
+@discovery_class(PyenvCompat, PyenvFallback)
+def test_no_specifier_error_if_no_sys_executable(
+    monkeypatch, discovery_class, options, from_exe_mock,
+    builtin_get_interpreter_mock, error_log, sys_executable,
+):
+    monkeypatch.setattr('sys.executable', sys_executable)
+    options.python = []
+    discovery = discovery_class(options)
+
+    result = discovery.run()
+
+    assert result is None
+    from_exe_mock.assert_not_called()
+    builtin_get_interpreter_mock.assert_not_called()
+    _assert_error_message(
+        error_log, r'failed to discover the default interpreter')
 
 
 @pytest.mark.parametrize('requested_versions', [
@@ -103,22 +154,40 @@ def test_no_specifier_no_sys_executable(
     ['.\\python.exe'],
     ['/path/to/bin/python3.7', '/path/to/bin/python3.10'],
 ])
-def test_file_path(
-    options_mock, python_info_mock, from_exe_mock, error_log,
-    requested_versions,
+@discovery_class(PyenvCompat, PyenvFallback)
+def test_file_path_ok_if_compat_or_fallback(
+    discovery_class, options, python_info_mock, from_exe_mock,
+    builtin_get_interpreter_mock, error_log, requested_versions,
 ):
-    options_mock.python = requested_versions
-    discovery = Pyenv(options_mock)
+    options.python = requested_versions
+    discovery = discovery_class(options)
 
     result = discovery.run()
 
     assert result is python_info_mock
     from_exe_mock.assert_called_once_with(
         requested_versions[0],
-        app_data=options_mock.app_data,
-        env=options_mock.env,
+        app_data=options.app_data,
+        env=options.env,
     )
+    builtin_get_interpreter_mock.assert_not_called()
     _assert_no_error_message(error_log)
+
+
+@discovery_class(PyenvStrict)
+def test_file_path_error_if_strict(
+    discovery_class, options, from_exe_mock, builtin_get_interpreter_mock,
+    error_log,
+):
+    options.python = ['/path/to/python']
+    discovery = discovery_class(options)
+
+    result = discovery.run()
+
+    assert result is None
+    from_exe_mock.assert_not_called()
+    builtin_get_interpreter_mock.assert_not_called()
+    _assert_error_message(error_log, r'paths are not allowed')
 
 
 @pytest.mark.parametrize('versions,requested_versions,expected_version', [
@@ -147,11 +216,12 @@ def test_file_path(
     (['3.7.2', '3.11.1', '3.11.0'], ['cpython3.11.0'], '3.11.0'),
 ])
 def test_cpython_ok(
-    pyenv_root, options_mock, python_info_mock, from_exe_mock, error_log,
-    versions, requested_versions, expected_version,
+    discovery_class, pyenv_root, options, python_info_mock, from_exe_mock,
+    builtin_get_interpreter_mock, error_log, versions, requested_versions,
+    expected_version,
 ):
-    options_mock.python = requested_versions
-    discovery = Pyenv(options_mock)
+    options.python = requested_versions
+    discovery = discovery_class(options)
     expected_bin_path = _prepare_versions(
         pyenv_root, versions, expected_version)
 
@@ -160,9 +230,10 @@ def test_cpython_ok(
     assert result is python_info_mock
     from_exe_mock.assert_called_once_with(
         str(expected_bin_path),
-        app_data=options_mock.app_data,
-        env=options_mock.env,
+        app_data=options.app_data,
+        env=options.env,
     )
+    builtin_get_interpreter_mock.assert_not_called()
     _assert_no_error_message(error_log)
 
 
@@ -173,29 +244,52 @@ def test_cpython_ok(
     (['3.12-dev', '3.12.0a3'], ['3.12']),
     (['3.12-dev', '3.12.0a3'], ['3.12.0a2']),
 ])
-def test_cpython_no_match(
-    pyenv_root, options_mock, from_exe_mock, error_log,
-    versions, requested_versions,
+@discovery_class(PyenvCompat, PyenvStrict)
+def test_cpython_no_match_no_fallback_if_compat_or_strict(
+    discovery_class, pyenv_root, options, from_exe_mock,
+    builtin_get_interpreter_mock, error_log, versions, requested_versions,
 ):
-    options_mock.python = requested_versions
-    discovery = Pyenv(options_mock)
+    options.python = requested_versions
+    discovery = discovery_class(options)
     _prepare_versions(pyenv_root, versions)
 
     result = discovery.run()
 
     assert result is None
     from_exe_mock.assert_not_called()
+    builtin_get_interpreter_mock.assert_not_called()
     _assert_no_error_message(error_log)
 
 
-def test_cpython_spec_parse_error(options_mock, from_exe_mock, error_log):
-    options_mock.python = ['37.7']
-    discovery = Pyenv(options_mock)
+@discovery_class(PyenvFallback)
+def test_cpython_no_match_fall_back_to_builtin_if_fallback(
+    discovery_class, pyenv_root, options, from_exe_mock,
+    builtin_python_info_mock, builtin_get_interpreter_mock, error_log,
+):
+    options.python = ['3.7']
+    discovery = discovery_class(options)
+    _prepare_versions(pyenv_root, ['3.6.2', '3.6.11', '3.8.1'])
+
+    result = discovery.run()
+
+    assert result is builtin_python_info_mock
+    from_exe_mock.assert_not_called()
+    builtin_get_interpreter_mock.assert_called()
+    _assert_no_error_message(error_log)
+
+
+def test_cpython_spec_parse_error(
+    discovery_class, options, from_exe_mock, builtin_get_interpreter_mock,
+    error_log,
+):
+    options.python = ['37.7']
+    discovery = discovery_class(options)
 
     result = discovery.run()
 
     assert result is None
     from_exe_mock.assert_not_called()
+    builtin_get_interpreter_mock.assert_not_called()
     _assert_error_message(error_log, r'failed to parse version: 37\.7')
 
 
@@ -206,16 +300,18 @@ def test_cpython_spec_parse_error(options_mock, from_exe_mock, error_log):
     '3', 'py3', 'python3', 'cpython3',
 ])
 def test_cpython_major_minor_required(
-    pyenv_root, options_mock, from_exe_mock, error_log, requested_version,
+    discovery_class, pyenv_root, options, from_exe_mock,
+    builtin_get_interpreter_mock, error_log, requested_version,
 ):
-    options_mock.python = [requested_version]
-    discovery = Pyenv(options_mock)
+    options.python = [requested_version]
+    discovery = discovery_class(options)
     _prepare_versions(pyenv_root, ['3.11.0a1', '3.11.1', '3.11-dev'])
 
     result = discovery.run()
 
     assert result is None
     from_exe_mock.assert_not_called()
+    builtin_get_interpreter_mock.assert_not_called()
     _assert_error_message(error_log, r'major and minor .+ required')
 
 
@@ -223,14 +319,16 @@ def test_cpython_major_minor_required(
     'pypy37', 'ironpython3.8', 'somefancyforkpython3.10',
 ])
 def test_unsupported(
-    pyenv_root, options_mock, from_exe_mock, error_log, requested_version,
+    discovery_class, pyenv_root, options, from_exe_mock,
+    builtin_get_interpreter_mock, error_log, requested_version,
 ):
-    options_mock.python = [requested_version]
-    discovery = Pyenv(options_mock)
+    options.python = [requested_version]
+    discovery = discovery_class(options)
     _prepare_versions(pyenv_root, ['3.11.0a1', '3.11.1', '3.11-dev'])
 
     result = discovery.run()
 
     assert result is None
     from_exe_mock.assert_not_called()
+    builtin_get_interpreter_mock.assert_not_called()
     _assert_error_message(error_log, r'only cpython .+ supported')
