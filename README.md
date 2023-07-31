@@ -39,6 +39,45 @@ The Python discovery mechanism can be specified by:
   mkvirtualenv -p 3.10 testenv
   ```
 
+## Operation Mode
+
+The plugin supports several operation modes. The operation mode affects various aspects of the discovery process.
+
+|mode      |specifier|path specifier|fallback to `builtin`|
+|----------|---------|--------------|---------------------|
+|`compat`  |optional |allowed       |no                   |
+|`fallback`|optional |allowed       |yes                  |
+|`strict`  |required |error         |no                   |
+
+The mode is specified as a part of the discovery method name: `pyenv-{mode}`, e.g.,
+
+```shell
+virtualenv --discovery=pyenv-fallback -p 3.10 testenv
+```
+
+or
+
+```shell
+export VIRTUALENV_DISCOVERY=pyenv-strict
+virtualenv -p 3.10 testenv
+```
+
+If no mode is specified, the `compat` mode is used, that is, `--discovery=pyenv` is the same as `--discovery=pyenv-compat`.
+
+The `compat` mode is recommended for most cases. It mimics closely the `builtin` discovery plugin to maximize compatibility with existing tools (e.g., [build][build], [tox][tox]):
+
+* if no specifier is provided, the plugin falls back to `sys.executable`, even if it is not installed by pyenv;
+* if a path specifier (`-p /path/to/bin/python`) is provided, the path is used, even if it is not installed by pyenv;
+* otherwise (`-p 3.7`, `-p py37`), only pyenv–installed interpreters are used.
+
+The `fallback` mode is the same as `compat`, but in addition falls back to the `builtin` plugin if no interpreter was found. If multiple specifiers are provided, all of them are tried first before falling back to the `builtin` plugin as a last resort.
+
+The `strict` mode, as its name suggests, ensures that only pyenv–installed interpreters are used:
+
+* a specifier is required, `sys.executable` is never used as a fallback, even if it is installed by pyenv (may be relaxed in the future);
+* a path specifier is not allowed, even if the path points to a pyenv–installed interpreter (may be relaxed in the future);
+* no fallback to the `builtin` plugin.
+
 ## Python Specifier Format
 
 The plugin supports two specifier formats informally called “pyenv-style” and “virtualenv-style”.
@@ -89,6 +128,7 @@ virtualenv-pyenv does not rely on pyenv to discover Python interpreters, that is
 [tox]: https://tox.wiki/en/latest/
 [pyenv-inspect]: https://github.com/un-def/pyenv-inspect
 [pyenv-win]: https://github.com/pyenv-win/pyenv-win
+[build]: https://github.com/pypa/build
 [virtualenv-docs-config-file]: https://virtualenv.pypa.io/en/latest/cli_interface.html#configuration-file
 [virtualenv-docs-specifier-format]: https://virtualenv.pypa.io/en/latest/user_guide.html#python-discovery
 [tox-docs-testenv-factors]: https://tox.wiki/en/latest/user_guide.html#test-environments
