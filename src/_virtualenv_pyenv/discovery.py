@@ -135,15 +135,15 @@ class _Pyenv(Discover):
             raise _Error('only CPython is currently supported')
 
         # finally, we build a pyenv-style spec
-        major, minor = builtin_spec.major, builtin_spec.minor
-        # pyenv-inspect does not allow major-only version specifiers,
-        # but this constraint could be relaxed in the future
-        if major is None or minor is None:
-            raise _Error('major and minor version components are required')
-        version = f'{major}.{minor}'
-        patch = builtin_spec.micro
-        if patch is not None:
-            version = f'{version}.{patch}'
+        version_components: List[str] = []
+        for version_component_field in ('major', 'minor', 'micro'):
+            version_component = getattr(builtin_spec, version_component_field)
+            if version_component is None:
+                break
+            version_components.append(str(version_component))
+        if not version_components:
+            raise _Error('major version component is required')
+        version = '.'.join(version_components)
         pyenv_spec = PyenvPythonSpec(
             string_spec=version,
             implementation=Implementation.CPYTHON, version=version,

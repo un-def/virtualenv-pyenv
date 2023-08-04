@@ -195,12 +195,15 @@ def test_file_path_error_if_strict(
     (['3.12-dev', '3.12.0a3'], ['3.12-dev'], '3.12-dev'),
     (['3.12-dev', '3.12.0a3'], ['3.12.0a3'], '3.12.0a3'),
     # pyenv-style, final release
+    (['3.7.2', '3.7.11', '3.8.1'], ['3'], '3.8.1'),
     (['3.7.2', '3.7.11', '3.8.1'], ['3.7'], '3.7.11'),
     (['3.6.1', '3.6.5', '3.7.2', '3.7.11'], ['3.7.8', '3.6'], '3.6.5'),
     (['3.6.1', '3.6.5', '3.7.2', '3.7.8'], ['3.7.8', '3.6'], '3.7.8'),
     # virtualenv, tox-style
+    (['3.7.2', '3.7.11', '3.8.1'], ['py3'], '3.8.1'),
     (['3.7.2', '3.7.11', '3.8.1'], ['py37'], '3.7.11'),
     (['3.7.2', '3.7.11', '3.8.1'], ['py3.7'], '3.7.11'),
+    (['3.7.2', '3.7.11', '3.8.1'], ['cpython3'], '3.8.1'),
     (['3.7.2', '3.7.11', '3.8.1'], ['cpython37'], '3.7.11'),
     (['3.7.2', '3.7.11', '3.8.1'], ['cpython3.7'], '3.7.11'),
     (['3.7.2', '3.11.1', '3.11.0'], ['py311'], '3.11.1'),
@@ -209,11 +212,16 @@ def test_file_path_error_if_strict(
     (['3.7.2', '3.11.1', '3.11.0'], ['cpython3.11'], '3.11.1'),
     # virtualenv, other
     (['3.7.2', '3.11.1', '3.11.0'], ['311'], '3.11.1'),
+    (['3.7.2', '3.11.1', '3.11.0'], ['311-32'], '3.11.1'),
     (['3.7.2', '3.11.1', '3.11.0'], ['py3.11.0'], '3.11.0'),
+    (['3.7.2', '3.11.1', '3.11.0'], ['py3.11.0-64'], '3.11.0'),
+    (['3.7.2', '3.11.1', '3.11.0'], ['python3'], '3.11.1'),
     (['3.7.2', '3.11.1', '3.11.0'], ['python3.11'], '3.11.1'),
     (['3.7.2', '3.11.1', '3.11.0'], ['python3.11.0'], '3.11.0'),
     (['3.7.2', '3.11.1', '3.11.0'], ['python311'], '3.11.1'),
+    (['3.7.2', '3.11.1', '3.11.0'], ['python311-64'], '3.11.1'),
     (['3.7.2', '3.11.1', '3.11.0'], ['cpython3.11.0'], '3.11.0'),
+    (['3.7.2', '3.11.1', '3.11.0'], ['cpython3.11.0-32'], '3.11.0'),
 ])
 def test_cpython_ok(
     discovery_class, pyenv_root, options, python_info_mock, from_exe_mock,
@@ -238,6 +246,7 @@ def test_cpython_ok(
 
 
 @pytest.mark.parametrize('versions,requested_versions', [
+    (['3.6.2', '3.6.11', '3.8.1'], ['2']),
     (['3.6.2', '3.6.11', '3.8.1'], ['3.7']),
     (['3.6.1', '3.6.5', '3.7.2', '3.7.11'], ['3.7.8', '3.6.4']),
     # pre/dev releases require _exact_ match
@@ -293,13 +302,8 @@ def test_cpython_spec_parse_error(
     _assert_error_message(error_log, r'failed to parse version: 37\.7')
 
 
-@pytest.mark.parametrize('requested_version', [
-    # no version at all
-    'py', 'python', 'cpython',
-    # major version only
-    '3', 'py3', 'python3', 'cpython3',
-])
-def test_cpython_major_minor_required(
+@pytest.mark.parametrize('requested_version', ['py', 'python', 'cpython'])
+def test_cpython_major_required(
     discovery_class, pyenv_root, options, from_exe_mock,
     builtin_get_interpreter_mock, error_log, requested_version,
 ):
@@ -312,7 +316,7 @@ def test_cpython_major_minor_required(
     assert result is None
     from_exe_mock.assert_not_called()
     builtin_get_interpreter_mock.assert_not_called()
-    _assert_error_message(error_log, r'major and minor .+ required')
+    _assert_error_message(error_log, r'major .+ required')
 
 
 @pytest.mark.parametrize('requested_version', [

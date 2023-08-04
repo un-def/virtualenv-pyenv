@@ -82,22 +82,24 @@ The `strict` mode, as its name suggests, ensures that only pyenv–installed int
 
 The plugin supports two specifier formats informally called “pyenv-style” and “virtualenv-style”.
 
-The version part of both specifier formats can contain either two (`major.minor`) or three (`major.minor.patch`) components. When a two–component version is specified, the latest installed final patch release is selected, ignoring pre–/dev–releases. When a three–component version is specified, the exact final release is selected, ignoring pre–/dev–releases. The pre–/dev–release version is installed only if it is explicitly requested.
+The version part of both specifier formats can contain one (`major`), two (`major.minor`), or three (`major.minor.patch`) components. When a one–component version is specified, the latest installed final minor release is selected, ignoring pre–/dev–release. When a two–component version is specified, the latest installed final patch release is selected, ignoring pre–/dev–releases. When a three–component version is specified, the exact final release is selected, ignoring pre–/dev–releases. The pre–/dev–release version is selected only if it is explicitly requested.
 
-|installed             |requested |selected  |
-|----------------------|----------|----------|
-|`3.9.5`; `3.9.17`     |`3.9`     |`3.9.17`  |
-|`3.9.5`; `3.9.17`     |`3.9.5`   |`3.9.5`   |
-|`3.9.5`; `3.9.17`     |`3.9.0`   |—         |
-|`3.12-dev`; `3.12.0b3`|`3.12`    |—         |
-|`3.12-dev`; `3.12.0b3`|`3.12.0`  |—         |
-|`3.12-dev`; `3.12.0b3`|`3.12-dev`|`3.12-dev`|
-|`3.12-dev`; `3.12.0b3`|`3.12.0b3`|`3.12.0b3`|
+|installed                  |requested |selected  |
+|---------------------------|----------|----------|
+|`3.9.5`; `3.9.17`, `3.10.0`|`3`       |`3.10.0`  |
+|`3.9.5`; `3.9.17`, `3.10.0`|`3.9`     |`3.9.17`  |
+|`3.9.5`; `3.9.17`, `3.10.0`|`3.9.5`   |`3.9.5`   |
+|`3.9.5`; `3.9.17`, `3.10.0`|`3.9.0`   |—         |
+|`3.12-dev`; `3.12.0b3`     |`3.12`    |—         |
+|`3.12-dev`; `3.12.0b3`     |`3.12.0`  |—         |
+|`3.12-dev`; `3.12.0b3`     |`3.12-dev`|`3.12-dev`|
+|`3.12-dev`; `3.12.0b3`     |`3.12.0b3`|`3.12.0b3`|
 
 ### pyenv–style
 
 The same format as used by [pyenv][pyenv] (`pyenv install --list`).
 
+* a final version with 1 version component: `3`
 * a final version with 2 version components: `3.11`
 * a final version with 3 version components: `3.11.2`
 * a pre–release version: `3.13.0a4`, `3.12.0b3`, `3.11.0rc1`
@@ -108,6 +110,7 @@ The same format as used by [pyenv][pyenv] (`pyenv install --list`).
 The same format as used by [virtualenv][virtualenv] ([docs][virtualenv-docs-specifier-format]). A subset of this format is used by [tox][tox] ([docs][tox-docs-testenv-factors]).
 
 * a relative or absolute path: `/path/to/bin/python` (it can be any Python interpreter, not only installed by pyenv)
+* a final version with 1 version component: `py3`, `python3`, `cpython3`, `python3-32`, `py3-64`
 * a final version with 2 version components: `311`, `py311`, `py3.11`, `python311`, `cpython3.11`, `python3.11-32`, `py311-64`
 * a final version with 3 version components: `py3.11.2`, `python3.11.2`, `cpython3.11.2`, `python3.11.2-32`, `py3.11.2-64`
 
