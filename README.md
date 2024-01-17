@@ -118,7 +118,6 @@ The same format as used by [virtualenv][virtualenv] ([docs][virtualenv-docs-spec
 
 * Only CPython is supported at the moment.
 * The `architecture` part (`-32`/`-64`) of a specifier is ignored. For example, all of the following specifiers match any installed CPython 3.8.1 regardless of the architecture: `python3.8.1`, `python3.8.1-32`, `python3.8.1-64`.
-* [pyenv-win][pyenv-win] is not supported.
 
 ## Internals
 
@@ -130,7 +129,6 @@ virtualenv-pyenv does not rely on pyenv to discover Python interpreters, that is
 [virtualenvwrapper]: https://virtualenvwrapper.readthedocs.io/en/latest/
 [tox]: https://tox.wiki/en/latest/
 [pyenv-inspect]: https://github.com/un-def/pyenv-inspect
-[pyenv-win]: https://github.com/pyenv-win/pyenv-win
 [build]: https://github.com/pypa/build
 [virtualenv-docs-config-file]: https://virtualenv.pypa.io/en/latest/cli_interface.html#configuration-file
 [virtualenv-docs-specifier-format]: https://virtualenv.pypa.io/en/latest/user_guide.html#python-discovery
