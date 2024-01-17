@@ -1,10 +1,19 @@
 import logging
+import os
 import re
 
 import pytest
 from virtualenv.config.cli.parser import VirtualEnvOptions
 
 from _virtualenv_pyenv.discovery import PyenvCompat, PyenvFallback, PyenvStrict
+
+
+if os.name == 'nt':
+    PYTHON_EXECUTABLE = 'python.exe'
+    BIN_DIR = ''
+else:
+    PYTHON_EXECUTABLE = 'python'
+    BIN_DIR = 'bin'
 
 
 discovery_class = pytest.mark.discovery_class.with_args
@@ -80,9 +89,9 @@ def _assert_error_message(error_log, pattern):
 def _prepare_versions(pyenv_root, versions, expected_version=None):
     expected_bin_path = None
     for version in versions:
-        bin_dir = pyenv_root / 'versions' / version / 'bin'
+        bin_dir = pyenv_root / 'versions' / version / BIN_DIR
         bin_dir.mkdir(parents=True)
-        bin_path = bin_dir / 'python'
+        bin_path = bin_dir / PYTHON_EXECUTABLE
         bin_path.touch(mode=0o777)
         if version == expected_version:
             expected_bin_path = bin_path
