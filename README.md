@@ -1,5 +1,11 @@
 # virtualenv-pyenv
 
+![GitHub License](https://img.shields.io/github/license/un-def/virtualenv-pyenv?style=flat-square)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/virtualenv-pyenv?style=flat-square)
+![PyPI - Version](https://img.shields.io/pypi/v/virtualenv-pyenv?style=flat-square)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/virtualenv-pyenv?style=flat-square)
+![GitHub Repo stars](https://img.shields.io/github/stars/un-def/virtualenv-pyenv?style=flat-square)
+
 A [virtualenv][virtualenv] Python discovery plugin for [pyenv][pyenv]–installed interpreters
 
 ## Installation
