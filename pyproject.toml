@@ -6,29 +6,30 @@ build-backend = 'setuptools.build_meta'
 name = 'virtualenv-pyenv'
 description = 'A virtualenv Python discovery plugin for pyenv-installed interpreters'
 readme = 'README.md'
-license = {text = 'MIT'}
+license = 'MIT'
+license-files = ['LICENSE']
 authors = [
     {name = 'Dmitry Meyer', email = 'me@undef.im'},
 ]
 classifiers = [
     'Development Status :: 4 - Beta',
-    'License :: OSI Approved :: MIT License',
     'Intended Audience :: Developers',
     'Topic :: Software Development :: Libraries',
     'Topic :: Software Development :: Testing',
     'Topic :: Utilities',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
 ]
 keywords = ['virtualenv', 'pyenv']
-requires-python = '>= 3.8'
+requires-python = '>= 3.9'
 dependencies = [
     'virtualenv',
-    'pyenv-inspect >= 0.4, < 0.5',
+    'pyenv-inspect >= 0.5, < 0.6',
 ]
 dynamic = ['version']
 
@@ -37,6 +38,21 @@ Homepage = 'https://github.com/un-def/virtualenv-pyenv'
 Repository = 'https://github.com/un-def/virtualenv-pyenv.git'
 Changelog = 'https://github.com/un-def/virtualenv-pyenv/releases'
 Issues = 'https://github.com/un-def/virtualenv-pyenv/issues'
+
+[dependency-groups]
+lint = [
+    'flake8',
+    'isort',
+]
+test = [
+    'pytest',
+    'tox',
+]
+dev = [
+    {include-group = 'lint'},
+    {include-group = 'test'},
+]
+
 
 [project.entry-points.'virtualenv.discovery']
 pyenv = '_virtualenv_pyenv.discovery:PyenvCompat'
@@ -68,11 +84,12 @@ markers = ['discovery_class']
 legacy_tox_ini = '''
 [tox]
 envlist =
-    py38
     py39
     py310
     py311
     py312
+    py313
+    py314
     flake8
     isort
 isolated_build = true
