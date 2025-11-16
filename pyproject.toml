@@ -28,7 +28,7 @@ classifiers = [
 keywords = ['virtualenv', 'pyenv']
 requires-python = '>= 3.9'
 dependencies = [
-    'virtualenv',
+    'virtualenv >= 20.29.0',
     'pyenv-inspect >= 0.5, < 0.6',
 ]
 dynamic = ['version']
@@ -46,7 +46,7 @@ lint = [
 ]
 test = [
     'pytest',
-    'tox',
+    'pytest-mock',
 ]
 dev = [
     {include-group = 'lint'},

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import copy
 import logging
 import sys
@@ -105,7 +103,7 @@ class _Pyenv(Discover):
 
     def _get_interpreter(self, string_spec: str) -> Optional[PythonInfo]:
         logging.debug('find interpreter for spec %s', string_spec)
-        pyenv_spec: Optional[PythonSpec] = None
+        pyenv_spec: Optional[PyenvPythonSpec] = None
 
         # first, we try to parse the spec as a pyenv-style spec (e.g., 3.7,
         # 3.7.1, 3.7-dev)
@@ -144,6 +142,8 @@ class _Pyenv(Discover):
         if not version_components:
             raise _Error('major version component is required')
         version = '.'.join(version_components)
+        if builtin_spec.free_threaded:
+            version = f'{version}t'
         pyenv_spec = PyenvPythonSpec(
             string_spec=version,
             implementation=Implementation.CPYTHON, version=version,
@@ -159,7 +159,9 @@ class _Pyenv(Discover):
             return None
         return self._build_python_info(exec_path)
 
-    def _build_python_info(self, exec_path: Union[Path, str]) -> PythonInfo:
+    def _build_python_info(
+        self, exec_path: Union["Path", str],
+    ) -> Optional[PythonInfo]:
         return PythonInfo.from_exe(
             str(exec_path),
             app_data=self._options.app_data, env=self._options.env,

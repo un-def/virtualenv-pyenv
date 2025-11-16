@@ -105,20 +105,20 @@ The version part of both specifier formats can contain one (`major`), two (`majo
 
 The same format as used by [pyenv][pyenv] (`pyenv install --list`).
 
-* a final version with 1 version component: `3`
-* a final version with 2 version components: `3.11`
-* a final version with 3 version components: `3.11.2`
-* a pre–release version: `3.13.0a4`, `3.12.0b3`, `3.11.0rc1`
-* a dev version: `3.13-dev`
+* a final version with 1 version component: `3`, `3t`
+* a final version with 2 version components: `3.11`, `3.14t`
+* a final version with 3 version components: `3.11.2`, `3.14.1t`
+* a pre–release version: `3.13.0a4`, `3.12.0b3`, `3.11.0rc1`, `3.15.0a1t`
+* a dev version: `3.13-dev`, `3.15t-dev`
 
 ### virtualenv–style
 
 The same format as used by [virtualenv][virtualenv] ([docs][virtualenv-docs-specifier-format]). A subset of this format is used by [tox][tox] ([docs][tox-docs-testenv-factors]).
 
 * a relative or absolute path: `/path/to/bin/python` (it can be any Python interpreter, not only installed by pyenv)
-* a final version with 1 version component: `py3`, `python3`, `cpython3`, `python3-32`, `py3-64`
-* a final version with 2 version components: `311`, `py311`, `py3.11`, `python311`, `cpython3.11`, `python3.11-32`, `py311-64`
-* a final version with 3 version components: `py3.11.2`, `python3.11.2`, `cpython3.11.2`, `python3.11.2-32`, `py3.11.2-64`
+* a final version with 1 version component: `py3`, `python3`, `cpython3`, `python3-32`, `py3-64`, `py3t`, `python3t`
+* a final version with 2 version components: `311`, `py311`, `py3.11`, `python311`, `cpython3.11`, `python3.11-32`, `py311-64`, `314t`, `py314t`, `cpython3.14t`
+* a final version with 3 version components: `py3.11.2`, `python3.11.2`, `cpython3.11.2`, `python3.11.2-32`, `py3.11.2-64`, `py3.14.0t`, `cpython3.14.0t`
 
 ## Limitations
 
