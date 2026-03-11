@@ -84,12 +84,8 @@ markers = ['discovery_class']
 legacy_tox_ini = '''
 [tox]
 envlist =
-    py39
-    py310
-    py311
-    py312
-    py313
-    py314
+    py3{10,11,12,13,14}
+    py3{10,11,12,13,14}-virtualenv20
     flake8
     isort
 isolated_build = true
@@ -98,6 +94,7 @@ isolated_build = true
 deps =
     pytest
     pytest-mock
+    virtualenv20: virtualenv<21
 commands = pytest {posargs}
 
 [testenv:flake8]

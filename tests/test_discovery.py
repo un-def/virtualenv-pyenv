@@ -4,8 +4,11 @@ import re
 
 import pytest
 from virtualenv.config.cli.parser import VirtualEnvOptions
+from virtualenv.version import version_tuple as _virtualenv_version_tuple
 
-from _virtualenv_pyenv.discovery import PyenvCompat, PyenvFallback, PyenvStrict
+from _virtualenv_pyenv.discovery import (
+    PyenvCompat, PyenvFallback, PyenvStrict, PythonInfo,
+)
 
 
 if os.name == 'nt':
@@ -51,8 +54,9 @@ def python_info_mock(mocker):
 
 @pytest.fixture
 def from_exe_mock(mocker, python_info_mock):
-    return mocker.patch(
-        'virtualenv.discovery.py_info.PythonInfo.from_exe',
+    return mocker.patch.object(
+        PythonInfo, 'from_exe',
+        autospec=True,
         return_value=python_info_mock,
     )
 
@@ -86,6 +90,13 @@ def _assert_error_message(error_log, pattern):
     assert re.search(pattern, message, flags=re.I) is not None, message
 
 
+def _from_exe_kwargs(options):
+    kwargs = {'env': options.env}
+    if int(_virtualenv_version_tuple[0]) < 21:
+        kwargs['app_data'] = options.app_data
+    return kwargs
+
+
 def _prepare_versions(pyenv_root, versions, expected_version=None):
     expected_bin_path = None
     for version in versions:
@@ -112,8 +123,7 @@ def test_no_specifier_ok_if_compat_or_fallback(
     assert result is python_info_mock
     from_exe_mock.assert_called_once_with(
         '/sys/executable/python',
-        app_data=options.app_data,
-        env=options.env,
+        **_from_exe_kwargs(options),
     )
     builtin_get_interpreter_mock.assert_not_called()
     _assert_no_error_message(error_log)
@@ -176,8 +186,7 @@ def test_file_path_ok_if_compat_or_fallback(
     assert result is python_info_mock
     from_exe_mock.assert_called_once_with(
         requested_versions[0],
-        app_data=options.app_data,
-        env=options.env,
+        **_from_exe_kwargs(options),
     )
     builtin_get_interpreter_mock.assert_not_called()
     _assert_no_error_message(error_log)
@@ -267,8 +276,7 @@ def test_cpython_ok(
     assert result is python_info_mock
     from_exe_mock.assert_called_once_with(
         str(expected_bin_path),
-        app_data=options.app_data,
-        env=options.env,
+        **_from_exe_kwargs(options),
     )
     builtin_get_interpreter_mock.assert_not_called()
     _assert_no_error_message(error_log)

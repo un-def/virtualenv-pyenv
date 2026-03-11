@@ -1,7 +1,8 @@
 import copy
+import inspect
 import logging
 import sys
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Union
 
 from pyenv_inspect import find_pyenv_python_executable
 from pyenv_inspect.exceptions import (
@@ -10,12 +11,21 @@ from pyenv_inspect.exceptions import (
 from pyenv_inspect.spec import Implementation, PyenvPythonSpec
 from virtualenv.discovery.builtin import Builtin
 from virtualenv.discovery.discover import Discover
-from virtualenv.discovery.py_info import PythonInfo
-from virtualenv.discovery.py_spec import PythonSpec
+
+
+try:
+    from virtualenv.discovery.py_info import PythonInfo
+    from virtualenv.discovery.py_spec import PythonSpec
+except ImportError:
+    from python_discovery import PythonInfo, PythonSpec
 
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+
+_from_exe_takes_app_data = (
+    'app_data' in inspect.signature(PythonInfo.from_exe).parameters)
 
 
 class _Error(Exception):
@@ -33,6 +43,9 @@ class _Pyenv(Discover):
         super().__init__(options)
         self._options = options
         self._string_specs: List[str] = options.python
+        self._from_exe_kwargs: dict[str, Any] = {'env': options.env}
+        if _from_exe_takes_app_data:
+            self._from_exe_kwargs['app_data'] = options.app_data
 
     def __str__(self) -> str:
         if len(self._string_specs) == 1:
@@ -162,10 +175,7 @@ class _Pyenv(Discover):
     def _build_python_info(
         self, exec_path: Union["Path", str],
     ) -> Optional[PythonInfo]:
-        return PythonInfo.from_exe(
-            str(exec_path),
-            app_data=self._options.app_data, env=self._options.env,
-        )
+        return PythonInfo.from_exe(str(exec_path), **self._from_exe_kwargs)
 
 
 class PyenvCompat(_Pyenv):
